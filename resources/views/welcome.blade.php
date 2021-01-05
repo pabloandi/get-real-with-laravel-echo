@@ -22,8 +22,8 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
     </head>
     <body>
-        <div id="app">
-
+        <div id="app" class="flex-center position-ref full-height">
+            <task-list></task-list>
         </div>
         <script src="/js/app.js"></script>
     </body>

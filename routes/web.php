@@ -1,7 +1,8 @@
 <?php
 
-use App\Events\OrderStatusUpdated;
-use App\Models\Order;
+use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\TaskController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,6 +20,11 @@ Route::get('/', function () {
     return view('welcome');
 });
 
- Route::get('/update', function () {
-    OrderStatusUpdated::dispatch(Order::factory()->create());
+Route::get('/users/{id}', function ($id) {
+    Auth::loginUsingId($id);
+    return 'Authenticated as user: '.request()->user()->name;
 });
+
+Route::resource('/tasks', TaskController::class);
+
+Route::resource('/projects', ProjectController::class);
