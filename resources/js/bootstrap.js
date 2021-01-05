@@ -26,3 +26,8 @@ window.Echo = new Echo({
     cluster: process.env.MIX_PUSHER_APP_CLUSTER,
     forceTLS: true
 });
+
+window.Echo.channel('orders')
+    .listen('OrderStatusUpdated', e => {
+        console.log(`Order with id: ${e.order.id} and title: ${e.order.title} has been updated` );
+    });

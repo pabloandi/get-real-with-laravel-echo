@@ -16,7 +16,9 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    OrderStatusUpdated::dispatch(Order::factory()->create());
-
     return view('welcome');
+});
+
+ Route::get('/update', function () {
+    OrderStatusUpdated::dispatch(Order::factory()->create());
 });
