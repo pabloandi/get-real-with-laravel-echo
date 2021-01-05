@@ -3,7 +3,14 @@
         <div class="field">
             <label class="label">New Task</label>
             <div class="control">
-                <input type="text" class="input" v-model="newTask" @keyup.enter="addTask" placeholder="add your new task here">
+                <input
+                    type="text"
+                    class="input"
+                    v-model="newTask"
+                    @keyup.enter="addTask"
+                    @keydown="tagPeers"
+                    placeholder="add your new task here">
+                    <span v-if="activePeer" v-text="peerTyping"></span>
             </div>
         </div>
         <div class="media" :key="index" v-for="(task, index) in tasks">
@@ -26,7 +33,17 @@ export default {
     data(){
         return {
             newTask: '',
-            tasks: []
+            tasks: [],
+            activePeer: false,
+            typingTimer: false,
+        }
+    },
+    computed: {
+        peerTyping(){
+            return this.activePeer.name + ' is typing ...';
+        },
+        channel(){
+            return Echo.private(`tasks.${this.project.id}`);
         }
     },
     async created(){
@@ -39,13 +56,27 @@ export default {
             console.log(error);
         }
 
-        window.Echo.private(`tasks.${this.project.id}`)
-            .listen('TaskCreated', ({ task }) => {
-                this.tasks.push(task.body);
-            });
+        this.channel
+            .listen('TaskCreated', ({ task }) => this.tasks.push(task.body))
+            .listenForWhisper('typing', this.flashActivePeer);
+
     },
     methods: {
+        flashActivePeer(e){
+                this.activePeer = e;
+
+                if(this.typingTimer) clearTimeout(this.typingTimer);
+
+                this.typingTimer = setTimeout(() => this.activePeer = false, 500);
+        },
+        tagPeers(){
+
+            this.channel
+                .whisper('typing', window.currentuser);
+        },
         addTask(){
+            this.activePeer = false;
+
             axios.post(`/api/projects/${this.project.id}/tasks`, {
                 body: this.newTask
             });

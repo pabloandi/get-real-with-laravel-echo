@@ -1945,6 +1945,13 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
@@ -1955,8 +1962,18 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
   data: function data() {
     return {
       newTask: '',
-      tasks: []
+      tasks: [],
+      activePeer: false,
+      typingTimer: false
     };
+  },
+  computed: {
+    peerTyping: function peerTyping() {
+      return this.activePeer.name + ' is typing ...';
+    },
+    channel: function channel() {
+      return Echo["private"]("tasks.".concat(this.project.id));
+    }
   },
   created: function created() {
     var _this = this;
@@ -1986,11 +2003,10 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
               console.log(_context.t0);
 
             case 12:
-              window.Echo["private"]("tasks.".concat(_this.project.id)).listen('TaskCreated', function (_ref) {
+              _this.channel.listen('TaskCreated', function (_ref) {
                 var task = _ref.task;
-
-                _this.tasks.push(task.body);
-              });
+                return _this.tasks.push(task.body);
+              }).listenForWhisper('typing', _this.flashActivePeer);
 
             case 13:
             case "end":
@@ -2001,7 +2017,20 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     }))();
   },
   methods: {
+    flashActivePeer: function flashActivePeer(e) {
+      var _this2 = this;
+
+      this.activePeer = e;
+      if (this.typingTimer) clearTimeout(this.typingTimer);
+      this.typingTimer = setTimeout(function () {
+        return _this2.activePeer = false;
+      }, 500);
+    },
+    tagPeers: function tagPeers() {
+      this.channel.whisper('typing', window.currentuser);
+    },
     addTask: function addTask() {
+      this.activePeer = false;
       axios__WEBPACK_IMPORTED_MODULE_1___default.a.post("/api/projects/".concat(this.project.id, "/tasks"), {
         body: this.newTask
       });
@@ -26567,6 +26596,7 @@ var render = function() {
                 }
                 return _vm.addTask($event)
               },
+              keydown: _vm.tagPeers,
               input: function($event) {
                 if ($event.target.composing) {
                   return
@@ -26574,7 +26604,11 @@ var render = function() {
                 _vm.newTask = $event.target.value
               }
             }
-          })
+          }),
+          _vm._v(" "),
+          _vm.activePeer
+            ? _c("span", { domProps: { textContent: _vm._s(_vm.peerTyping) } })
+            : _vm._e()
         ])
       ]),
       _vm._v(" "),

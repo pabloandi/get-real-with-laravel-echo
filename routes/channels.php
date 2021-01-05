@@ -1,6 +1,7 @@
 <?php
 
 use App\Broadcasting\TaskChannel;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Broadcast;
 
 /*
@@ -16,3 +17,7 @@ use Illuminate\Support\Facades\Broadcast;
 
 
 Broadcast::channel('tasks.{project}', TaskChannel::class);
+
+Broadcast::channel('testing1', function(){
+    return true;
+});
